@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>油车vs电车经济性价比计算器</title>
+    <!-- 添加网站图标 -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg t='1744376227151' class='icon' viewBox='0 0 1024 1024' version='1.1' xmlns='http://www.w3.org/2000/svg' p-id='1674' width='200' height='200'%3E%3Cpath d='M143.36 580.267a341.333 341.333 0 1 0 682.667 0 341.333 341.333 0 1 0-682.667 0z' fill='%23E9EAEB' p-id='1675'%3E%3C/path%3E%3Cpath d='M812.373 348.16l-81.92 122.88h-40.96l-40.96-40.96h-27.306l-54.614 68.267H512l-54.613-95.574h-54.614l-27.306 40.96h-54.614L266.24 512h-27.307v300.373h655.36V348.16z' fill='%23FFFFFF' p-id='1676'%3E%3C/path%3E%3Cpath d='M238.933 703.147H307.2l54.613-68.267h81.92l40.96 54.613h81.92L675.84 580.267h81.92L798.72 512h95.573v300.373h-655.36z' fill='%23A3D4FF' p-id='1677'%3E%3C/path%3E%3Cpath d='M273.067 525.653h-34.134v-27.306h20.48l54.614-68.267h54.613l27.307-40.96h69.632l54.613 95.573h39.595l54.613-68.266h39.595l40.96 40.96h28.672l81.92-122.88h88.746v27.306H819.2l-81.92 122.88h-53.248l-40.96-40.96h-15.019L573.44 512h-69.632l-54.613-95.573H409.6l-27.307 40.96H327.68zM102.4 798.72h819.2v27.307H102.4z m211.627-81.92h-75.094v-27.307h61.44l54.614-68.266h95.573l40.96 54.613h69.632l109.227-109.227h79.189l40.96-68.266h103.765v27.306h-87.381l-40.96 68.267h-84.65L572.074 703.147h-94.208l-40.96-54.614H368.64z m-211.627 0h54.613v27.307H102.4z m0-81.92h54.613v27.307H102.4z m0-81.92h54.613v27.307H102.4z m0-81.92h54.613v27.307H102.4z m0-81.92h54.613v27.307H102.4z m0-81.92h54.613v27.307H102.4z' fill='%232A5082' p-id='1678'%3E%3C/path%3E%3Cpath d='M184.32 307.2h27.307v505.173H184.32z' fill='%232A5082' p-id='1679'%3E%3C/path%3E%3Cpath d='M771.413 197.973h27.307v81.92h-27.307z' fill='%23BCC0C4' p-id='1680'%3E%3C/path%3E%3Cpath d='M744.107 225.28h81.92v27.307h-81.92z m-177.494 27.307h27.307v81.92h-27.307z' fill='%23BCC0C4' p-id='1681'%3E%3C/path%3E%3Cpath d='M539.307 279.893h81.92V307.2h-81.92zM675.84 102.4h27.307v81.92H675.84z' fill='%23BCC0C4' p-id='1682'%3E%3C/path%3E%3Cpath d='M648.533 129.707h81.92v27.306h-81.92z' fill='%23BCC0C4' p-id='1683'%3E%3C/path%3E%3C/svg%3E">
+    <!-- 引入Chart.js库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        .calculating {
+            cursor: progress;
+        }
+        .invalid {
+            border-color: #e74c3c !important;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2) !important;
+        }
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #3498db, #2c3e50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            padding-bottom: 10px;
+        }
+        .calculator {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+            align-items: stretch;
+        }
+        .input-section, .result-section {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .input-content {
+            flex-grow: 1;
+        }
+        .result-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .button-wrapper {
+            padding-top: 20px;
+            margin-bottom: 1px; /* 确保与右侧底部精确对齐 */
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .result-card {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        .result-card h3 {
+            margin-bottom: 12px;
+            color: #2c3e50;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 8px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 3px 0;
+            font-size: 15px;
+        }
+        .result-item span:last-child {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .winner {
+            background: linear-gradient(to right, rgba(76, 175, 80, 0.1), rgba(255, 255, 255, 0.8));
+            border-left: 4px solid #4caf50;
+            transform: scale(1.02);
+        }
+        .comparison-chart {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .chart-bar {
+            flex: 1;
+            margin: 0 10px;
+            position: relative;
+        }
+        .bar {
+            width: 100%;
+            background-color: #3498db;
+            position: relative;
+            transition: height 0.5s ease;
+            border-radius: 5px 5px 0 0;
+        }
+        .gas-bar {
+            background-color: #e74c3c;
+        }
+        .electric-bar {
+            background-color: #2ecc71;
+        }
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+        }
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+        }
+        .chart-baseline {
+            height: 2px;
+            background-color: #333;
+            margin-top: 10px;
+        }
+        .note {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
+            text-align: center;
+        }
+        .chart-wrapper {
+            margin-top: 40px;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(5px);
+        }
+        .chart-wrapper h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 22px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .balance-point {
+            margin-top: 15px;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), rgba(52, 152, 219, 0.1));
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            color: #2c3e50;
+            border-left: 4px solid #4caf50;
+        }
+        .balance-point-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .balance-point-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        @media (max-width: 768px) {
+            .calculator {
+                flex-direction: column;
+            }
+            .input-section, .result-section {
+                width: 100%;
+            }
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .chart-wrapper {
+                padding: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+                margin: 0;
+            }
+            h1 {
+                font-size: 22px;
+                margin-bottom: 20px;
+            }
+            .result-card {
+                padding: 15px;
+            }
+            input[type="number"] {
+                padding: 10px;
+            }
+        }
+        .result-section h2 {
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>租车经济性价比计算器</h1>
+        
+        <div class="calculator">
+            <div class="input-section">
+                <div class="input-content">
+                    <div class="form-group">
+                        <label>里程输入类型</label>
+                        <div style="display: flex; gap: 20px; align-items: center;">
+                            <input type="radio" id="dailyDistance" name="distanceType" value="daily" checked>
+                            <label for="dailyDistance" style="display: inline; margin-right: 20px;">平均每天行驶公里数</label>
+                            <input type="radio" id="totalDistance" name="distanceType" value="total">
+                            <label for="totalDistance" style="display: inline;">总行程公里数</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expectedDistance">预期行驶里程 (公里)</label>
+                        <input type="number" id="expectedDistance" value="150">
+                    </div>
+                    
+                    <h2>油车参数</h2>
+                    <div class="form-group">
+                        <label for="gasTotalPrice" id="gasTotalPriceLabel">每天租车成本 (元)</label>
+                        <input type="number" id="gasTotalPrice" value="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="gasConsumption">百公里油耗 (升/100公里)</label>
+                        <input type="number" id="gasConsumption" value="8">
+                    </div>
+                    <div class="form-group">
+                        <label for="gasPrice">汽油价格 (元/升)</label>
+                        <input type="number" id="gasPrice" value="7.5">
+                    </div>
+                    
+                    <h2>电车参数</h2>
+                    <div class="form-group">
+                        <label for="electricTotalPrice" id="electricTotalPriceLabel">每天租车成本 (元)</label>
+                        <input type="number" id="electricTotalPrice" value="150">
+                    </div>
+                    <div class="form-group">
+                        <label for="electricConsumption">百公里电耗 (度/100公里)</label>
+                        <input type="number" id="electricConsumption" value="15">
+                    </div>
+                    <div class="form-group">
+                        <label for="electricityPrice">电价 (元/度)</label>
+                        <input type="number" id="electricityPrice" value="1.2">
+                    </div>
+                </div>
+                
+                <div class="button-wrapper">
+                    <button id="calculateBtn">计算比较</button>
+                </div>
+            </div>
+            
+            <div class="result-section">
+                <div class="result-content">
+                    <h2>计算结果</h2>
+                    <div id="gasResult" class="result-card">
+                        <h3 id="gasCostTitle">油车每天成本</h3>
+                        <div class="result-item">
+                            <span>车辆租赁费用:</span>
+                            <span id="gasPurchaseCost">0 元</span>
+                        </div>
+                        <div class="result-item">
+                            <span>燃油费用:</span>
+                            <span id="gasFuelCost">0 元</span>
+                        </div>
+                        <div class="result-item">
+                            <span id="gasTotalCostLabel">每天总成本:</span>
+                            <span id="gasTotalCost">0 元</span>
+                        </div>
+                    </div>
+                    
+                    <div id="electricResult" class="result-card">
+                        <h3 id="electricCostTitle">电车每天成本</h3>
+                        <div class="result-item">
+                            <span>车辆租赁费用:</span>
+                            <span id="electricPurchaseCost">0 元</span>
+                        </div>
+                        <div class="result-item">
+                            <span>充电费用:</span>
+                            <span id="electricChargeCost">0 元</span>
+                        </div>
+                        <div class="result-item">
+                            <span id="electricTotalCostLabel">每天总成本:</span>
+                            <span id="electricTotalCost">0 元</span>
+                        </div>
+                    </div>
+                    
+                    <div id="balancePointResult" class="balance-point">
+                        <div class="balance-point-title">
+                            <span>平衡点: </span>
+                            <span id="balancePoint">0 公里</span>
+                        </div>
+                        <div class="balance-point-info">
+                            <div class="result-item">
+                                <span id="balanceConclusion">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span id="expectedDistanceRecommendation">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="comparisonResult" class="result-card">
+                        <h3 id="comparisonTitle">比较结果</h3>
+                        <div class="result-item">
+                            <span id="savingAmountLabel">节省金额:</span>
+                            <span id="savingAmount">0 元</span>
+                        </div>
+                        <div class="result-item">
+                            <span id="savingPercentageLabel">节省比例:</span>
+                            <span id="savingPercentage">0%</span>
+                        </div>
+                        <div class="result-item">
+                            <span>推荐选择:</span>
+                            <span id="recommendation">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-wrapper">
+            <h3>租车成本对比折线图</h3>
+            <div style="height: 400px; position: relative;">
+                <canvas id="costComparisonChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="note">
+            <p>注意：此计算器仅提供参考，实际成本可能因车型、驾驶习惯、路况、保养费用等因素而有所不同。</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calculateBtn = document.getElementById('calculateBtn');
+            calculateBtn.addEventListener('click', calculateComparison);
+            
+            // 添加里程类型切换事件监听器，用于更新标签
+            document.getElementById('dailyDistance').addEventListener('change', updateLabels);
+            document.getElementById('totalDistance').addEventListener('change', updateLabels);
+            
+            let costComparisonChart = null;
+            
+            // 初始更新标签
+            updateLabels();
+            
+            // 初始计算一次
+            calculateComparison();
+            
+            // 更新标签函数
+            function updateLabels() {
+                const isDaily = document.getElementById('dailyDistance').checked;
+                const gasTotalPriceLabel = document.getElementById('gasTotalPriceLabel');
+                const electricTotalPriceLabel = document.getElementById('electricTotalPriceLabel');
+                const gasCostTitle = document.getElementById('gasCostTitle');
+                const electricCostTitle = document.getElementById('electricCostTitle');
+                const gasTotalCostLabel = document.getElementById('gasTotalCostLabel');
+                const electricTotalCostLabel = document.getElementById('electricTotalCostLabel');
+                const savingAmountLabel = document.getElementById('savingAmountLabel');
+                const savingPercentageLabel = document.getElementById('savingPercentageLabel');
+                const comparisonTitle = document.getElementById('comparisonTitle');
+                
+                if (isDaily) {
+                    gasTotalPriceLabel.textContent = '每天租车成本 (元)';
+                    electricTotalPriceLabel.textContent = '每天租车成本 (元)';
+                    gasCostTitle.textContent = '油车每天成本';
+                    electricCostTitle.textContent = '电车每天成本';
+                    gasTotalCostLabel.textContent = '每天总成本:';
+                    electricTotalCostLabel.textContent = '每天总成本:';
+                    savingAmountLabel.textContent = '每天节省金额:';
+                    savingPercentageLabel.textContent = '每天节省比例:';
+                    comparisonTitle.textContent = '每天比较结果';
+                } else {
+                    gasTotalPriceLabel.textContent = '油车租车总价 (元)';
+                    electricTotalPriceLabel.textContent = '电车租车总价 (元)';
+                    gasCostTitle.textContent = '油车成本';
+                    electricCostTitle.textContent = '电车成本';
+                    gasTotalCostLabel.textContent = '租车总成本:';
+                    electricTotalCostLabel.textContent = '租车总成本:';
+                    savingAmountLabel.textContent = '节省金额:';
+                    savingPercentageLabel.textContent = '节省比例:';
+                    comparisonTitle.textContent = '比较结果';
+                }
+                
+                // 触发重新计算以更新显示
+                calculateComparison();
+            }
+            
+            function calculateComparison() {
+                // 添加计算动画效果
+                document.body.classList.add('calculating');
+                setTimeout(() => document.body.classList.remove('calculating'), 500);
+                
+                // 获取输入值并验证
+                const gasTotalPrice = parseFloat(document.getElementById('gasTotalPrice').value) || 0;
+                const gasConsumption = parseFloat(document.getElementById('gasConsumption').value) || 0;
+                const gasPrice = parseFloat(document.getElementById('gasPrice').value) || 0;
+                
+                const electricTotalPrice = parseFloat(document.getElementById('electricTotalPrice').value) || 0;
+                const electricConsumption = parseFloat(document.getElementById('electricConsumption').value) || 0;
+                const electricityPrice = parseFloat(document.getElementById('electricityPrice').value) || 0;
+                
+                // 获取预期行驶里程和里程类型
+                let inputDistance = parseFloat(document.getElementById('expectedDistance').value) || 0;
+                const isDaily = document.getElementById('dailyDistance').checked;
+                
+                // 输入验证 - 确保所有值都是正数
+                validateInput('gasTotalPrice', gasTotalPrice);
+                validateInput('gasConsumption', gasConsumption);
+                validateInput('gasPrice', gasPrice);
+                validateInput('electricTotalPrice', electricTotalPrice);
+                validateInput('electricConsumption', electricConsumption);
+                validateInput('electricityPrice', electricityPrice);
+                validateInput('expectedDistance', inputDistance);
+                
+                // 根据里程类型计算实际总里程
+                const expectedDistance = isDaily ? inputDistance * 365 : inputDistance; // 如果是每天里程，则乘以365天
+                
+                // 计算每公里成本
+                const gasCostPerKm = (gasConsumption * gasPrice) / 100; // 油车每公里燃油成本
+                const electricCostPerKm = (electricConsumption * electricityPrice) / 100; // 电车每公里电费成本
+                
+                let balancePointKm = 0;
+                let balancePointText = "无平衡点";
+                let balanceConclusion = "";
+                let expectedDistanceRecommendation = "";
+                let distanceDisplay = "";
+                
+                // 使用用户提供的平衡点计算公式：ABS((油车租金-电车租金)/(油车油耗*油价-电车电耗*电价))*100
+                const costDifference = (gasConsumption * gasPrice) - (electricConsumption * electricityPrice);
+                
+                if (costDifference !== 0) {
+                    // 正确应用平衡点计算公式
+                    balancePointKm = Math.abs((gasTotalPrice - electricTotalPrice) / costDifference) * 100;
+                    balancePointText = balancePointKm.toFixed(0) + " 公里";
+                    
+                    // 添加平衡点结论
+                    if (gasCostPerKm > electricCostPerKm) {
+                        balanceConclusion = "行驶里程小于" + balancePointKm.toFixed(0) + "公里时，油车更经济；行驶里程高于" + balancePointKm.toFixed(0) + "公里时，电车更经济。";
+                    } else {
+                        balanceConclusion = "行驶里程小于" + balancePointKm.toFixed(0) + "公里时，电车更经济；行驶里程高于" + balancePointKm.toFixed(0) + "公里时，油车更经济。";
+                    }
+                    
+                    // 添加预期里程建议
+                    distanceDisplay = expectedDistance.toFixed(0);
+                    if (isDaily) {
+                        distanceDisplay = inputDistance.toFixed(0) + "公里/天";
+                    } else {
+                        distanceDisplay = expectedDistance.toFixed(0) + "公里";
+                    }
+                    
+                    if (expectedDistance < balancePointKm) {
+                        expectedDistanceRecommendation = "预期行驶" + distanceDisplay + "，" + (gasCostPerKm > electricCostPerKm ? "油车" : "电车") + "更经济";
+                    } else {
+                        expectedDistanceRecommendation = "预期行驶" + distanceDisplay + "，" + (gasCostPerKm > electricCostPerKm ? "电车" : "油车") + "更经济";
+                    }
+                    
+                } else if (gasTotalPrice === electricTotalPrice) {
+                    balancePointText = "两种方案成本始终相等";
+                    balanceConclusion = "无论行驶多少里程，两种方案成本相同。";
+                    
+                    distanceDisplay = expectedDistance.toFixed(0);
+                    if (isDaily) {
+                        distanceDisplay = inputDistance.toFixed(0) + "公里/天";
+                    } else {
+                        distanceDisplay = expectedDistance.toFixed(0) + "公里";
+                    }
+                    
+                    expectedDistanceRecommendation = "预期行驶" + distanceDisplay + "，两种方案成本相同";
+                } else {
+                    balancePointText = "无平衡点，" + (gasTotalPrice < electricTotalPrice ? "油车始终更经济" : "电车始终更经济");
+                    balanceConclusion = gasTotalPrice < electricTotalPrice ? "无论行驶多少里程，油车始终更经济。" : "无论行驶多少里程，电车始终更经济。";
+                    
+                    distanceDisplay = expectedDistance.toFixed(0);
+                    if (isDaily) {
+                        distanceDisplay = inputDistance.toFixed(0) + "公里/天";
+                    } else {
+                        distanceDisplay = expectedDistance.toFixed(0) + "公里";
+                    }
+                    
+                    expectedDistanceRecommendation = "预期行驶" + distanceDisplay + "，" + (gasTotalPrice < electricTotalPrice ? "油车" : "电车") + "更经济";
+                }
+                
+                // 使用用户输入的预期里程计算成本，而不是固定的示例里程
+                const gasFuelCost = (expectedDistance / 100) * gasConsumption * gasPrice;
+                const gasTotalCost = gasTotalPrice + gasFuelCost;
+                
+                const electricChargeCost = (expectedDistance / 100) * electricConsumption * electricityPrice;
+                const electricTotalCost = electricTotalPrice + electricChargeCost;
+                
+                // 生成不同里程下的成本数据（用于绘制折线图）
+                // 根据用户输入的预期行驶里程设置x轴上限为其两倍
+                let maxDistance = expectedDistance * 2;
+                
+                // 生成更密集的距离数组
+                const distances = [];
+                // 增加数据点数量，使间距更小
+                const totalPoints = 100; // 增加到100个点
+                for (let i = 0; i <= totalPoints; i++) {
+                    // 确保距离值是整数，避免显示问题
+                    distances.push(Math.round(i * maxDistance / totalPoints));
+                }
+                
+                const gasCosts = [];
+                const electricCosts = [];
+                
+                for (const distance of distances) {
+                    const gasCost = gasTotalPrice + (distance / 100) * gasConsumption * gasPrice;
+                    const electricCost = electricTotalPrice + (distance / 100) * electricConsumption * electricityPrice;
+                    
+                    gasCosts.push(gasCost);
+                    electricCosts.push(electricCost);
+                }
+                
+                // 计算节省金额和比例
+                let difference, higherCost, savingPercentage;
+                let dailyGasTotalCost, dailyElectricTotalCost;
+                
+                if (isDaily) {
+                    // 如果是每天里程，计算每天的节省金额
+                    dailyGasTotalCost = gasTotalPrice + (gasFuelCost / 365);
+                    dailyElectricTotalCost = electricTotalPrice + (electricChargeCost / 365);
+                    difference = Math.abs(dailyGasTotalCost - dailyElectricTotalCost);
+                    higherCost = Math.max(dailyGasTotalCost, dailyElectricTotalCost);
+                } else {
+                    // 如果是总里程，计算总节省金额
+                    difference = Math.abs(gasTotalCost - electricTotalCost);
+                    higherCost = Math.max(gasTotalCost, electricTotalCost);
+                }
+                
+                savingPercentage = (difference / higherCost) * 100;
+                
+                // 确定推荐选择
+                let recommendation = "油车和电车成本相同";
+                let winner = null;
+                
+                if (isDaily) {
+                    if (dailyGasTotalCost < dailyElectricTotalCost) {
+                        recommendation = "油车更经济";
+                        winner = 'gas';
+                    } else if (dailyElectricTotalCost < dailyGasTotalCost) {
+                        recommendation = "电车更经济";
+                        winner = 'electric';
+                    }
+                } else {
+                    if (gasTotalCost < electricTotalCost) {
+                        recommendation = "油车更经济";
+                        winner = 'gas';
+                    } else if (electricTotalCost < gasTotalCost) {
+                        recommendation = "电车更经济";
+                        winner = 'electric';
+                    }
+                }
+                
+                // 更新结果显示
+                // 根据里程类型调整显示的成本
+                if (isDaily) {
+                    // 如果是每天里程，显示每天的成本
+                    document.getElementById('gasPurchaseCost').textContent = gasTotalPrice.toFixed(2) + ' 元';
+                    document.getElementById('gasFuelCost').textContent = (gasFuelCost / 365).toFixed(2) + ' 元';
+                    document.getElementById('gasTotalCost').textContent = (gasTotalPrice + (gasFuelCost / 365)).toFixed(2) + ' 元';
+                    
+                    document.getElementById('electricPurchaseCost').textContent = electricTotalPrice.toFixed(2) + ' 元';
+                    document.getElementById('electricChargeCost').textContent = (electricChargeCost / 365).toFixed(2) + ' 元';
+                    document.getElementById('electricTotalCost').textContent = (electricTotalPrice + (electricChargeCost / 365)).toFixed(2) + ' 元';
+                } else {
+                    // 如果是总里程，显示总成本
+                    document.getElementById('gasPurchaseCost').textContent = gasTotalPrice.toFixed(2) + ' 元';
+                    document.getElementById('gasFuelCost').textContent = gasFuelCost.toFixed(2) + ' 元';
+                    document.getElementById('gasTotalCost').textContent = gasTotalCost.toFixed(2) + ' 元';
+                    
+                    document.getElementById('electricPurchaseCost').textContent = electricTotalPrice.toFixed(2) + ' 元';
+                    document.getElementById('electricChargeCost').textContent = electricChargeCost.toFixed(2) + ' 元';
+                    document.getElementById('electricTotalCost').textContent = electricTotalCost.toFixed(2) + ' 元';
+                }
+                
+                document.getElementById('balancePoint').textContent = balancePointText;
+                document.getElementById('balanceConclusion').textContent = balanceConclusion;
+                document.getElementById('expectedDistanceRecommendation').textContent = expectedDistanceRecommendation;
+                
+                document.getElementById('savingAmount').textContent = difference.toFixed(2) + ' 元';
+                document.getElementById('savingPercentage').textContent = savingPercentage.toFixed(2) + '%';
+                document.getElementById('recommendation').textContent = recommendation;
+                
+                // 高亮显示获胜者
+                document.getElementById('gasResult').classList.remove('winner');
+                document.getElementById('electricResult').classList.remove('winner');
+                
+                if (winner === 'gas') {
+                    document.getElementById('gasResult').classList.add('winner');
+                } else if (winner === 'electric') {
+                    document.getElementById('electricResult').classList.add('winner');
+                }
+                
+                // 更新折线图
+                updateChart(distances, gasCosts, electricCosts);
+            }
+            
+            // 输入验证函数
+            function validateInput(inputId, value) {
+                const inputElement = document.getElementById(inputId);
+                if (value <= 0) {
+                    inputElement.classList.add('invalid');
+                } else {
+                    inputElement.classList.remove('invalid');
+                }
+            }
+            
+            function updateChart(distances, gasCosts, electricCosts) {
+                const ctx = document.getElementById('costComparisonChart').getContext('2d');
+                
+                // 如果图表已存在，销毁它
+                if (costComparisonChart) {
+                    costComparisonChart.destroy();
+                }
+                
+                // 获取当前预期行驶里程
+                let inputDistance = parseFloat(document.getElementById('expectedDistance').value) || 0;
+                
+                // 直接使用用户输入的值作为最大距离计算基础，不考虑日均转年度的乘法
+                // 确保X轴上限为预期行驶里程的两倍
+                const maxDistance = inputDistance * 2;
+                
+                // 创建适当数量的数据点，确保最后一个点是maxDistance
+                const dataPoints = [];
+                const dataGasCosts = [];
+                const dataElectricCosts = [];
+                
+                // 使用11个点（0到10）以保持图表简单且点间距均匀
+                for (let i = 0; i <= 10; i++) {
+                    const distance = Math.round(i * maxDistance / 10);
+                    dataPoints.push(distance);
+                    
+                    // 计算当前距离下的成本
+                    // 需要根据里程类型调整计算方法
+                    const isDaily = document.getElementById('dailyDistance').checked;
+                    const distanceForCost = isDaily ? distance * 365 : distance; // 如果是每天里程，则乘以365天来计算成本
+                    
+                    // 获取输入参数
+                    const gasTotalPrice = parseFloat(document.getElementById('gasTotalPrice').value) || 0;
+                    const gasConsumption = parseFloat(document.getElementById('gasConsumption').value) || 0;
+                    const gasPrice = parseFloat(document.getElementById('gasPrice').value) || 0;
+                    
+                    const electricTotalPrice = parseFloat(document.getElementById('electricTotalPrice').value) || 0;
+                    const electricConsumption = parseFloat(document.getElementById('electricConsumption').value) || 0;
+                    const electricityPrice = parseFloat(document.getElementById('electricityPrice').value) || 0;
+                    
+                    // 计算成本
+                    const gasFuelCost = (distanceForCost / 100) * gasConsumption * gasPrice;
+                    const electricChargeCost = (distanceForCost / 100) * electricConsumption * electricityPrice;
+                    
+                    let gasCost, electricCost;
+                    
+                    if (isDaily) {
+                        // 每天模式下，显示每天的成本
+                        gasCost = gasTotalPrice + (gasFuelCost / 365);
+                        electricCost = electricTotalPrice + (electricChargeCost / 365);
+                    } else {
+                        // 总行程模式下，显示总成本
+                        gasCost = gasTotalPrice + gasFuelCost;
+                        electricCost = electricTotalPrice + electricChargeCost;
+                    }
+                    
+                    dataGasCosts.push(gasCost);
+                    dataElectricCosts.push(electricCost);
+                }
+                
+                // 使用简化的Chart.js配置
+                costComparisonChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dataPoints.map(d => d + '公里'),
+                        datasets: [
+                            {
+                                label: '油车租车总成本',
+                                data: dataGasCosts,
+                                borderColor: '#e74c3c',
+                                backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.3,
+                                pointRadius: 0,
+                                pointHoverRadius: 0
+                            },
+                            {
+                                label: '电车租车总成本',
+                                data: dataElectricCosts,
+                                borderColor: '#2ecc71',
+                                backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.3,
+                                pointRadius: 0,
+                                pointHoverRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '不同里程下油车与电车的租车总成本对比',
+                                font: {
+                                    size: 18,
+                                    weight: 'bold'
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            legend: {
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '行驶里程',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: '租车总成本 (元)',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
